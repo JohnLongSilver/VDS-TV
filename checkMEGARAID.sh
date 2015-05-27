@@ -142,6 +142,11 @@ main() {
 
     declare -a servers=($(grep -e "^vault" -e "^streamer" ${SERVER_LIST_FILE} | awk '{print $2}'))
 
+    if [ ${#servers[@]} -eq 0 ]; then
+        echo "There is no Vault nor Streamer to check in the ${SERVER_LIST_FILE} file"
+        exit 0
+    fi
+
 #> ${LOG_FILE}
 
     {
