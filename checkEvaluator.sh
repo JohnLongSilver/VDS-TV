@@ -192,7 +192,6 @@ if [ ${#servers[@]} -eq 0 ]; then
     exit 0
 fi
 
-
 while true
 do
     showRemoteValues "${servers[@]}"

@@ -23,7 +23,7 @@ BATTERY_REPLACEMENT_THRESHOLD=10
 #
 usage() {
 cat << __EO_USAGE__
-usage: $PROGNAME [options]
+usage: ${PROGNAME} [options]
 
 options:
     -h        Print this help message.
@@ -76,10 +76,10 @@ retrieveNSDStatus() {
             # prevent Ctrl-C the loop
             # trap ':' INT
 
-            >/tmp/${line}.Database.log
+            >/tmp/${line}.${PROGNAME}.log
 
             #will later add -n to ssh in order to prevent it from reading stdin
-            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.Database.log
+            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.${PROGNAME}.log
 
             grep ": No Servers Down" /arroyo/log/avsdb.log | tail -1
 __EO_SSH__
@@ -102,10 +102,10 @@ retrieveSDStatus() {
             # prevent Ctrl-C the loop
             # trap ':' INT
 
-            >/tmp/${line}.Database.log
+            >/tmp/${line}.${PROGNAME}.log
 
             #will later add -n to ssh in order to prevent it from reading stdin
-            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.Database.log
+            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.${PROGNAME}.log
 
             grep ": Servers Down" /arroyo/log/avsdb.log | tail -1
 __EO_SSH__
@@ -131,7 +131,7 @@ retrieveBackLogStatus() {
             >/tmp/${line}.Database.log
 
             #will later add -n to ssh in order to prevent it from reading stdin
-            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.Database.log
+            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.${PROGNAME}.log
 
             grep "bklog" /arroyo/log/avsdb.log | tail -1
 __EO_SSH__
@@ -154,10 +154,10 @@ retrieveNETSTATStatus() {
             # prevent Ctrl-C the loop
             # trap ':' INT
 
-            >/tmp/${line}.Database.log
+            >/tmp/${line}.${PROGNAME}.log
 
             #will later add -n to ssh in order to prevent it from reading stdin
-            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.Database.log
+            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.${PROGNAME}.log
 
             netstat -an | grep 9999
 __EO_SSH__
@@ -236,7 +236,7 @@ showNSDtatus() {
 
     for line in "${@}"
     do
-        cat /tmp/${line}.Database.log | sed 's/No Servers Down,/NSD/' | awk '{print $1" "$2" "$3" "$4"\t\t"$6}' | sed 's/NSD/No Servers Down/'
+        cat /tmp/${line}.${PROGNAME}.log | sed 's/No Servers Down,/NSD/' | awk '{print $1" "$2" "$3" "$4"\t\t"$6}' | sed 's/NSD/No Servers Down/'
     done
 }
 
@@ -249,7 +249,7 @@ showSDtatus() {
 
     for line in "${@}"
     do
-        cat /tmp/${line}.Database.log | sed 's/Servers Down,/SD/' | awk '{print $1" "$2" "$3" "$4"\t\t"$6}' | sed 's/NSD/Servers Down/'
+        cat /tmp/${line}.${PROGNAME}.log | sed 's/Servers Down,/SD/' | awk '{print $1" "$2" "$3" "$4"\t\t"$6}' | sed 's/NSD/Servers Down/'
     done
 }
 
@@ -262,7 +262,7 @@ showBackLogStatus() {
 
     for line in "${@}"
     do
-        awk '{ printf "%s %s %s %s\t\tBacklog:%s\n", $1, $2, $3, $4, $14 }' /tmp/${line}.Database.log
+        awk '{ printf "%s %s %s %s\t\tBacklog:%s\n", $1, $2, $3, $4, $14 }' /tmp/${line}.${PROGNAME}.log
     done
 }
 
@@ -279,7 +279,7 @@ showNETSTATtatus() {
     do
         echo ${hostnames[${index}]}
 
-        grep -v LISTEN /tmp/${line}.Database.log | awk '{print $4"\t"$5"\t"$6}'
+        grep -v LISTEN /tmp/${line}.${PROGNAME}.log | awk '{print $4"\t"$5"\t"$6}'
     
         let index++
     done
@@ -296,6 +296,11 @@ processCommandLine "$@"
 declare -a servers=($(grep -e "^vault" ${SERVER_LIST_FILE} | awk '{print $2}'))
 
 declare -a hostnames=( $(retrieveEvaluatorHostnames "${servers[@]}") )
+
+if [ ${#servers[@]} -eq 0 ]; then
+    echo "There is no Vault nor Streamer to check in the ${SERVER_LIST_FILE} file"
+    exit 0
+fi
 
 setMasterVault "${servers[@]}"
 
