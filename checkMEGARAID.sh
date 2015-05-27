@@ -145,6 +145,9 @@ main() {
     if [ ${#servers[@]} -eq 0 ]; then
         echo "There is no Vault nor Streamer to check in the ${SERVER_LIST_FILE} file"
         exit 0
+    else
+        echo "========================================================================"
+        echo "There is ${#servers[@]} vault/streamers to be checked today the $(date)"
     fi
 
 #> ${LOG_FILE}
