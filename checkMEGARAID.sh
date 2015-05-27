@@ -21,7 +21,7 @@ BATTERY_REPLACEMENT_THRESHOLD=10
 #
 usage() {
 cat << __EO_USAGE__
-usage: $PROGNAME.sh [options]
+usage: ${PROGNAME}.sh [options]
 
 options:
     -h            Print this help message.
@@ -78,19 +78,19 @@ retrieveMegaRaidStatus() {
             # prevent Ctrl-C the loop
             trap ':' INT
 
-            >/tmp/${line}.MegaRAID.log
+            >/tmp/${line}.${PROGNAME}.log
 
             echo "retrieve battery status and firmware version for ${line}"
 
             #will later add -n to ssh in order to prevent it from reading stdin 
-            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.MegaRAID.log
+            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.${PROGNAME}.log
 
             /opt/MegaRAID/CmdTool2/CmdTool2 -AdpEventLog -GetEvents -f /tmp/megaraid.log -aALL
 
             cat /tmp/megaraid.log
 __EO_SSH__
         } || {
-            rm /tmp/${line}.MegaRAID.log
+            rm /tmp/${line}.${PROGNAME}.log
             unset servers[${index}]
         }
 
@@ -109,7 +109,7 @@ showBatteryStatus() {
                               -e "Battery Not Present" \
                               -e "BBU removed" \
                               -e "BBU not seen" \
-                              /tmp/${line}.MegaRAID.log) 
+                              /tmp/${line}.${PROGNAME}.log)
 
         if (("${OCCURRENCES}" >= "${BATTERY_REPLACEMENT_THRESHOLD}"))
         then
@@ -128,7 +128,7 @@ showFirmwareVersion () {
     #echo "${@}" | while read line
     for line in "${@}"
     do
-       OUTPUT=$( grep -m 1 "Event Description: Firmware version" /tmp/${line}.MegaRAID.log | sed 's/Event Description: //')
+       OUTPUT=$( grep -m 1 "Event Description: Firmware version" /tmp/${line}.${PROGNAME}.log | sed 's/Event Description: //')
        echo "${line} ${OUTPUT}"
     done
 }
