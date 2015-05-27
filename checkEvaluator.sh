@@ -18,7 +18,7 @@ PROGNAME=`basename $0`
 LOOPTIME=10
 
 SERVER_LIST_FILE=/home/isa/.arroyorc_laurent
-SSH_CONNECTION_TIMEOUT=1
+SSH_CONNECTION_TIMEOUT=10
 BATTERY_REPLACEMENT_THRESHOLD=10
 
 #
@@ -31,6 +31,7 @@ usage: $PROGNAME [options]
 options:
     -h        Print this help message.
     -l        provide a list file
+    -t        connection time out value; defaulted to 10 seconds
 __EO_USAGE__
 }
 
@@ -41,7 +42,7 @@ processCommandLine() {
 
 OPTIND=1
 
-    while getopts "hl:" key; do
+    while getopts "hl:t:" key; do
         case "${key}" in
             h)
                 usage
@@ -51,6 +52,9 @@ OPTIND=1
                 if [ -f ${SERVER_LIST_FILE} ]; then
                 SERVER_LIST_FILE=${OPTARG}
                 fi
+                ;;
+            t)
+                SSH_CONNECTION_TIMEOUT=${OPTARG}
                 ;;
             *)
                 usage
@@ -79,15 +83,15 @@ retrieveEvaluatorStatus() {
             # prevent Ctrl-C the loop
             #trap ':' INT
 
-            >/tmp/${line}.Evaluator.log
+            >/tmp/${line}.${PROGNAME}.log
 
             #will later add -n to ssh in order to prevent it from reading stdin
-            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.Evaluator.log
+            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.${PROGNAME}.log
 
             tail -79 $logfile
 __EO_SSH__
         } || {
-            rm /tmp/${line}.Evaluator.log
+            rm /tmp/${line}.${PROGNAME}.log
             unset servers[${index}]
         }
 
@@ -149,13 +153,13 @@ showRemoteValues() {
     for line in "${@}"
     do
         local VAULT=${hostnames[${index}]}
-        local EVALUATOR=$(grep "^.Evaluators Enabled" /tmp/${line}.Evaluator.log | awk -F '=' '{ print $2 }' | awk '{ print $1 }' )
-        local DATARECOVERY=$(grep "^.DataRecovery" /tmp/${line}.Evaluator.log | awk -F '=' '{ print $3 }' | awk '{ print $1 }' )
-        local MIRRORRECOVERY=$(grep "^.MirrorRecovery" /tmp/${line}.Evaluator.log | awk '{ print $3 }' ) 
-        local LOCALMIRROR=$(grep "^.LocalMirror" /tmp/${line}.Evaluator.log | awk -F '=' '{ print $3 }' | awk '{ print $1 }' )
-        local DEFRAG=$(grep "^.Defrag" /tmp/${line}.Evaluator.log | awk -F '=' '{ print $3 }' | awk '{ print $1 }' )
-        local SMOOTH=$(grep "^.Smooth" /tmp/${line}.Evaluator.log | awk -F '=' '{ print $3 }' | awk '{ print $1 }')
-        local REMOTESMOOTH=$(grep "^.RemoteSmooth" /tmp/${line}.Evaluator.log | awk -F '=' '{ print $2 }' | awk '{ print $1 }')
+        local EVALUATOR=$(grep "^.Evaluators Enabled" /tmp/${line}.${PROGNAME}.log | awk -F '=' '{ print $2 }' | awk '{ print $1 }' )
+        local DATARECOVERY=$(grep "^.DataRecovery" /tmp/${line}.${PROGNAME}.log | awk -F '=' '{ print $3 }' | awk '{ print $1 }' )
+        local MIRRORRECOVERY=$(grep "^.MirrorRecovery" /tmp/${line}.${PROGNAME}.log | awk '{ print $3 }' )
+        local LOCALMIRROR=$(grep "^.LocalMirror" /tmp/${line}.${PROGNAME}.log | awk -F '=' '{ print $3 }' | awk '{ print $1 }' )
+        local DEFRAG=$(grep "^.Defrag" /tmp/${line}.${PROGNAME}.log | awk -F '=' '{ print $3 }' | awk '{ print $1 }' )
+        local SMOOTH=$(grep "^.Smooth" /tmp/${line}.${PROGNAME}.log | awk -F '=' '{ print $3 }' | awk '{ print $1 }')
+        local REMOTESMOOTH=$(grep "^.RemoteSmooth" /tmp/${line}.${PROGNAME}.log | awk -F '=' '{ print $2 }' | awk '{ print $1 }')
 
         VAULT=$(DEFAULT ${VAULT})
         EVALUATOR=$(RED ${EVALUATOR}) 
