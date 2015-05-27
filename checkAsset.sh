@@ -23,7 +23,7 @@ BATTERY_REPLACEMENT_THRESHOLD=10
 #
 usage() {
 cat << __EO_USAGE__
-usage: $PROGNAME [options]
+usage: ${PROGNAME} [options]
 
 options:
     -h        Print this help message.
@@ -47,7 +47,7 @@ OPTIND=1
                 ;;
             l)
                 if [ -f ${SERVER_LIST_FILE} ]; then
-                SERVER_LIST_FILE=${OPTARG}
+                    SERVER_LIST_FILE=${OPTARG}
                 fi
                 ;;
             t)
@@ -79,15 +79,15 @@ retrieveEvaluatorStatus() {
             # prevent Ctrl-C the loop
             # trap ':' INT
 
-            >/tmp/${line}.Database.log
+            >/tmp/${line}.${PROGNAME}.log
 
             #will later add -n to ssh in order to prevent it from reading stdin
-            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.Database.log
+            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.${PROGNAME}.log
 
             tail -79 $logfile
 __EO_SSH__
         } || {
-            rm /tmp/${line}.Database.log
+            rm /tmp/${line}.${PROGNAME}.log
             unset servers[${index}]
         }
 
@@ -108,10 +108,10 @@ retrieveBackLogStatus() {
             # prevent Ctrl-C the loop
             # trap ':' INT
 
-            >/tmp/${line}.Database.log
+            >/tmp/${line}.${PROGNAME}.log
 
             #will later add -n to ssh in order to prevent it from reading stdin
-            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.Database.log
+            ssh -o ConnectTimeout=${SSH_CONNECTION_TIMEOUT} -o StrictHostKeyChecking=no root@${line} 'bash -s' << __EO_SSH__ > /tmp/${line}.${PROGNAME}.log
 
             grep "bklog" /arroyo/log/avsdb.log | tail -1
 __EO_SSH__
@@ -227,7 +227,7 @@ showRemoteValues() {
     for line in "${@}"
     do
         local VAULT=${hostnames[${index}]}
-        local EVALUATOR=$(grep "^.Evaluators Enabled" /tmp/${line}.Database.log | awk -F '=' '{ print $2 }' | awk '{ print $1 }' )
+        local EVALUATOR=$(grep "^.Evaluators Enabled" /tmp/${line}.${PROGNAME}.log | awk -F '=' '{ print $2 }' | awk '{ print $1 }' )
         local ASSET=$( retrieveAssetNumber ${servers[${index}]} )
 
         VAULT=$(DEFAULT ${VAULT})

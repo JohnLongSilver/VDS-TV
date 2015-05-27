@@ -17,7 +17,7 @@ PROGNAME=`basename $0`
 
 LOOPTIME=10
 
-SERVER_LIST_FILE=/home/isa/.arroyorc_laurent
+SERVER_LIST_FILE=/home/isa/.arroyorc
 SSH_CONNECTION_TIMEOUT=10
 BATTERY_REPLACEMENT_THRESHOLD=10
 
@@ -26,7 +26,7 @@ BATTERY_REPLACEMENT_THRESHOLD=10
 #
 usage() {
 cat << __EO_USAGE__
-usage: $PROGNAME [options]
+usage: ${PROGNAME} [options]
 
 options:
     -h        Print this help message.
@@ -186,6 +186,12 @@ processCommandLine "$@"
 declare -a servers=($(grep -e "^vault" ${SERVER_LIST_FILE} | awk '{print $2}'))
 
 declare -a hostnames=( $(retrieveEvaluatorHostnames "${servers[@]}") )
+
+if [ ${#servers[@]} -eq 0 ]; then
+    echo "There is no Vault nor Streamer to check in the ${SERVER_LIST_FILE} file"
+    exit 0
+fi
+
 
 while true
 do
