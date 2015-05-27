@@ -142,7 +142,7 @@ main() {
 
     declare -a servers=($(grep -e "^vault" -e "^streamer" ${SERVER_LIST_FILE} | awk '{print $2}'))
 
-    > ${LOG_FILE}
+#> ${LOG_FILE}
 
     {
     retrieveMegaRaidStatus "${servers[@]}"
@@ -151,9 +151,7 @@ main() {
 
     showFirmwareVersion "${servers[@]}"
 
-    } >> ${LOG_FILE}
-
-    cat ${LOG_FILE}
+    } | tee -a ${LOG_FILE}
 }
 
 #
