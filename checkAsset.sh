@@ -231,7 +231,18 @@ showRemoteValues() {
         local ASSET=$( retrieveAssetNumber ${servers[${index}]} )
 
         VAULT=$(DEFAULT ${VAULT})
-        if [ "${ASSET}" -ne "${CDSM_ASSET}" ] ; then ASSET=$(RED ${ASSET}); else ASSET=$(DEFAULT ${ASSET}); fi
+
+        if [ ! -z "${ASSET}" ] ; then
+            if [ "${ASSET}" -ne "${CDSM_ASSET}" ] ; then
+                ASSET=$(RED ${ASSET})
+            else
+                ASSET=$(DEFAULT ${ASSET})
+            fi
+        else
+            # expect is a whimsical command... and this is how I chose to handle it.
+            ASSET=$(BLINK 'timeout')
+        fi
+
         if [ "${EVALUATOR}" -ne "1" ] ; then EVALUATOR=$(RED ${EVALUATOR}); else EVALUATOR=$(DEFAULT ${EVALUATOR}); fi
 
         printf "%b%-25s%b%b%10s%b%b%10s%b\n" ${VAULT} ${EVALUATOR} ${ASSET}
