@@ -11,8 +11,6 @@
 #	v 0.2   16-04-2015 -- print table values
 #	v 0.2.1 16-04-2015 -- preliminary work to add coloring support
 
-#source /root/scripts/simple_curses.sh
-DIRNAME=`dirname $0`
 PROGNAME=`basename $0`
 
 LOOPTIME=10

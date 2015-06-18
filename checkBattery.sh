@@ -8,7 +8,6 @@
 #	v 0.1.2 03-03-2015 -- make the ssh to server work in a loop with ip taken of a formated file
 #	v 0.1.3 04-03-2015 -- finaly output the battery status and the firmware version
 
-DIRNAME=`dirname $0`
 PROGNAME=`basename $0 .sh`
 
 SERVER_LIST_FILE=/home/isa/.arroyorc
@@ -145,6 +144,7 @@ main() {
     {
 
     if [ ${#servers[@]} -eq 0 ]; then
+        echo "========================================================================"
         echo "There is no Vault nor Streamer to check in the ${SERVER_LIST_FILE} file"
         exit 0
     else
