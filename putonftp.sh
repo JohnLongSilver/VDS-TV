@@ -11,8 +11,8 @@ FILE=$(basename "$1")
 cd ${FILE_PATH}
 
 HOST='10.50.212.97'
-USER='laorban'
-PASSWORD="J'aimelechocol4t"
+USER='yyyyyyy'
+PASSWORD="xxxxxxxxxxx"
 
 ftp -n $HOST << __EO_FTP__
 quote USER ${USER}
