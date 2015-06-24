@@ -18,6 +18,7 @@ SERVER_LIST_FILE=/home/isa/.arroyorc
 LOG_FILE=/arroyo/log/${PROGNAME}.log.$(date +%Y%m%d)
 SSH_CONNECTION_TIMEOUT=30
 BATTERY_REPLACEMENT_THRESHOLD=10
+VERBOSE=0
 
 #
 # Print the command line help message.
@@ -28,6 +29,7 @@ usage: ${PROGNAME}.sh [options]
 
 options:
     -h    Print this help message.
+    -v    verbose
     -l    provide a list file; defaulted to ${SERVER_LIST_FILE}
     -t    connection time out value; defaulted to ${SSH_CONNECTION_TIMEOUT} seconds
     -e    thereshold battery error message occurence should not reach. Defaulted to ${BATTERY_REPLACEMENT_THRESHOLD}
@@ -41,7 +43,7 @@ processCommandLine() {
 
 OPTIND=1
 
-    while getopts "hl:e:t:" key; do
+    while getopts "hl:e:t:v" key; do
         case "${key}" in
             h)
                 usage
@@ -58,9 +60,12 @@ OPTIND=1
             t)
                 SSH_CONNECTION_TIMEOUT=${OPTARG}
                 ;;
+            v)
+                VERBOSE=1
+                ;;
             *)
                 usage
-                exit 1 
+                exit 1
                 ;;
         esac
     done
@@ -114,8 +119,7 @@ showBatteryStatus() {
                                     -e "BBU not seen" \
                             /tmp/${line}.${PROGNAME}.log)
 
-        if (("${OCCURRENCES}" >= "${BATTERY_REPLACEMENT_THRESHOLD}"))
-        then
+        if (("${OCCURRENCES}" >= "${BATTERY_REPLACEMENT_THRESHOLD}")); then
             echo "[${OCCURRENCES} occurences] ${line} needs to replace the MegaRaid battery!"
         else
             echo "[${OCCURRENCES} occurences] ${line} has no battery issue"
@@ -137,6 +141,21 @@ showFirmwareVersion () {
 }
 
 #
+#
+#
+verbose() {
+
+cat << __EO_HEADER__
+========================================================================
+Command invoked : $0 $@
+By user : $(whoami)
+At $(date)
+Logging to : ${LOG_FILE}
+__EO_HEADER__
+
+}
+
+#
 # code entry-point.
 #
 main() {
@@ -146,14 +165,9 @@ main() {
     declare -a servers=($(grep -e "^vault" -e "^streamer" ${SERVER_LIST_FILE} | awk '{print $2}'))
 
     {
-
-cat << __EO_HEADER__
-========================================================================
-Command invoked : $0 $@
-By user : $(whoami)
-At $(date)
-Logging to : ${LOG_FILE}
-__EO_HEADER__
+    if (( "${VERBOSE}" )); then
+        verbose
+    fi
 
     if [ ${#servers[@]} -eq 0 ]; then
 
