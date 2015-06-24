@@ -165,7 +165,7 @@ main() {
     declare -a servers=($(grep -e "^vault" -e "^streamer" ${SERVER_LIST_FILE} | awk '{print $2}'))
 
     {
-    if (( "${VERBOSE}" )); then
+    if (( ${VERBOSE} )); then
         verbose
     fi
 
