@@ -147,16 +147,21 @@ main() {
 
     {
 
-    echo "========================================================================"
+cat << __EO_HEADER__
+========================================================================
+Command invoked : $0 $@
+By user : $(whoami)
+At $(date)
+Logging to : ${LOG_FILE}
+__EO_HEADER__
 
     if [ ${#servers[@]} -eq 0 ]; then
 
-        echo "There is no Vault nor Streamer to check in the '${SERVER_LIST_FILE}' file"
+        echo "There is no Vault nor Streamer to be checked."
         exit 0
     else
-        echo "There is ${#servers[@]} vault/streamers to be checked today the $(date). File used is '${SERVER_LIST_FILE}'"
+        echo "There is ${#servers[@]} vault/streamers to be checked."
     fi
-
 
     retrieveMegaRaidStatus "${servers[@]}"
 
