@@ -2,7 +2,9 @@
 
 #set -x
 
-set -euo pipefail
+set -e
+set -u
+set -o pipefail
 
 #	Author Laurent Orban
 #	v 0.1 creation -- A simple retrieval
@@ -95,7 +97,7 @@ __EO_SSH__
             unset servers[${index}]
         }
 
-    let index++
+    let ++index
     done
 }
 
