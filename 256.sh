@@ -5,7 +5,13 @@
 # and/or modify it under the terms of the Do What The Fuck You Want
 # To Public License, Version 2, as published by Sam Hocevar. See
 # http://sam.zoy.org/wtfpl/COPYING for more details.
+
+PROGNAME=$(basename $0 .sh)
+echo $PROGNAME 
+exit 0
  
+exit 0
+
 for fgbg in 38 48 ; do #Foreground/Background
 	for color in {0..256} ; do #Colors
 		#Display the color

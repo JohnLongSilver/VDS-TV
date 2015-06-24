@@ -2,13 +2,15 @@
 
 #set -x
 
+set -euo pipefail
+
 #	Author Laurent Orban
 #	v 0.1 creation -- A simple retrieval
 #	v 0.1.1 27-02-2015 -- fancy it into a real script
 #	v 0.1.2 03-03-2015 -- make the ssh to server work in a loop with ip taken of a formated file
 #	v 0.1.3 04-03-2015 -- finaly output the battery status and the firmware version
 
-PROGNAME=`basename $0 .sh`
+readonly PROGNAME=$(basename $0 .sh)
 
 SERVER_LIST_FILE=/home/isa/.arroyorc
 LOG_FILE=/arroyo/log/${PROGNAME}.log.$(date +%Y%m%d)
@@ -23,10 +25,10 @@ cat << __EO_USAGE__
 usage: ${PROGNAME}.sh [options]
 
 options:
-    -h            Print this help message.
-    -l            provide a list file 
-    -t            connection time out value; defaulted to 30 seconds
-    -e            thereshold battery error message occurence should not reach. Defaulted to ${BATTERY_REPLACEMENT_THRESHOLD} 
+    -h    Print this help message.
+    -l    provide a list file; defaulted to ${SERVER_LIST_FILE}
+    -t    connection time out value; defaulted to ${SSH_CONNECTION_TIMEOUT} seconds
+    -e    thereshold battery error message occurence should not reach. Defaulted to ${BATTERY_REPLACEMENT_THRESHOLD}
 __EO_USAGE__
 }
 
@@ -69,7 +71,7 @@ shift $((OPTIND-1))
 #
 retrieveMegaRaidStatus() {
 
-    index=0
+    local index=0
 
     for line in "${@}"
     do
@@ -104,11 +106,11 @@ showBatteryStatus() {
 
     for line in "${@}"
     do
-        OCCURRENCES=$(grep -c -e "Battery needs replacement - SOH Bad" \
-                              -e "Battery Not Present" \
-                              -e "BBU removed" \
-                              -e "BBU not seen" \
-                              /tmp/${line}.${PROGNAME}.log)
+        local OCCURRENCES=$(grep -c -e "Battery needs replacement - SOH Bad" \
+                                    -e "Battery Not Present" \
+                                    -e "BBU removed" \
+                                    -e "BBU not seen" \
+                            /tmp/${line}.${PROGNAME}.log)
 
         if (("${OCCURRENCES}" >= "${BATTERY_REPLACEMENT_THRESHOLD}"))
         then
@@ -127,7 +129,7 @@ showFirmwareVersion () {
     #echo "${@}" | while read line
     for line in "${@}"
     do
-       OUTPUT=$( grep -m 1 "Event Description: Firmware version" /tmp/${line}.${PROGNAME}.log | sed 's/Event Description: //')
+       local OUTPUT=$(grep -m 1 "Event Description: Firmware version" /tmp/${line}.${PROGNAME}.log | sed 's/Event Description: //')
        echo "${line} ${OUTPUT}"
     done
 }
