@@ -74,7 +74,7 @@ shift $((OPTIND-1))
 }
 
 #
-# besides the obvious, the function removes any IP which is not functional from the ${servers[@]} list
+# besides the obvious, the function removes any IP which is not reachable or timed out from the ${servers[@]} list
 #
 retrieveMegaRaidStatus() {
 
@@ -132,7 +132,6 @@ showBatteryStatus() {
 #
 showFirmwareVersion () {
 
-    #echo "${@}" | while read line
     for line in "${@}"
     do
        local OUTPUT=$(grep -m 1 "Event Description: Firmware version" /tmp/${line}.${PROGNAME}.log | sed 's/Event Description: //')
